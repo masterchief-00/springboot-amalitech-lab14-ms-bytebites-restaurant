@@ -5,10 +5,10 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: user-service
-          uri: lb://user-service
+        - id: auth-service
+          uri: lb://auth-service
           predicates:
-            - Path=/user/**
+            - Path=/auth/**
     discovery:
       locator:
         enabled: true
