@@ -15,11 +15,20 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class AuthenticationFilter implements GatewayFilterFactory<Object> {
 
     private final String jwtSecret;
+    private static final Map<String, List<String>> roleAccessMap = Map.of(
+            "/restaurant", List.of("OWNER", "CUSTOMER"),
+            "/order", List.of("CUSTOMER", "OWNER"),
+            "/admin", List.of("ADMIN")
+    );
 
     public AuthenticationFilter() {
         jwtSecret = System.getenv("JWT_SECRET");
@@ -29,9 +38,10 @@ public class AuthenticationFilter implements GatewayFilterFactory<Object> {
     public GatewayFilter apply(Object config) {
         return ((exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
+            String path = request.getURI().getPath();
 
             // ignore /auth endpoints
-            if (request.getURI().getPath().contains("/auth")) {
+            if (path.contains("/auth")) {
                 return chain.filter(exchange);
             }
 
@@ -55,6 +65,18 @@ public class AuthenticationFilter implements GatewayFilterFactory<Object> {
 
                 String userId = claims.getSubject();
                 String role = claims.get("role", String.class);
+
+                // Check role permission based on path
+                Optional<String> matchingKey = roleAccessMap.keySet().stream()
+                        .filter(path::startsWith)
+                        .findFirst();
+
+                if (matchingKey.isPresent()) {
+                    List<String> allowedRoles = roleAccessMap.get(matchingKey.get());
+                    if (!allowedRoles.contains(role)) {
+                        return onError(exchange, "Forbidden: Role '" + role + "' not allowed", HttpStatus.FORBIDDEN);
+                    }
+                }
 
                 ServerHttpRequest modifiedRequest = exchange.getRequest()
                         .mutate()
