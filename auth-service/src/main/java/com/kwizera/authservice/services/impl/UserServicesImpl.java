@@ -32,6 +32,8 @@ public class UserServicesImpl implements UserServices {
                 .role(UserRole.CUSTOMER)
                 .build();
 
+        userRepository.save(user);
+
         return jwtUtil.generateToken(user);
     }
 
