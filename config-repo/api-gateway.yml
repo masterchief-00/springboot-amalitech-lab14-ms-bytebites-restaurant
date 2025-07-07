@@ -9,6 +9,10 @@ spring:
           uri: lb://AUTH-SERVICE
           predicates:
             - Path=/auth/**
+        - id: restaurant-service
+          uri: lb://RESTAURANT-SERVICE
+          predicates:
+            - Path:/restaurant/**
     discovery:
       locator:
         enabled: false
