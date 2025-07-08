@@ -2,7 +2,7 @@ package com.kwizera.apigateway.security;
 
 import io.jsonwebtoken.security.Keys;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
-import org.springframework.cloud.gateway.filter.factory.GatewayFilterFactory;
+import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,37 +15,32 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class AuthenticationFilter implements GatewayFilterFactory<Object> {
+public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
 
-    private final String jwtSecret;
-    private static final Map<String, List<String>> roleAccessMap = Map.of(
-            "/restaurant", List.of("OWNER", "CUSTOMER"),
-            "/order", List.of("CUSTOMER", "OWNER"),
-            "/admin", List.of("ADMIN")
-    );
+    private final String jwtSecret = System.getenv("JWT_SECRET");
 
     public AuthenticationFilter() {
-        jwtSecret = System.getenv("JWT_SECRET");
+        super(Config.class);
+    }
+
+    public static class Config {
     }
 
     @Override
-    public GatewayFilter apply(Object config) {
-        return ((exchange, chain) -> {
+    public GatewayFilter apply(Config config) {
+        return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
             String path = request.getURI().getPath();
 
-            // ignore /auth endpoints
             if (path.contains("/auth")) {
                 return chain.filter(exchange);
             }
 
-            // Check for Authorization header
             if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
                 return onError(exchange, "Missing Authorization Header", HttpStatus.UNAUTHORIZED);
             }
@@ -53,12 +48,12 @@ public class AuthenticationFilter implements GatewayFilterFactory<Object> {
             String token = request.getHeaders()
                     .getOrEmpty(HttpHeaders.AUTHORIZATION)
                     .get(0)
-                    .replace("Bearer", "");
+                    .replace("Bearer", "")
+                    .trim();
 
             try {
                 Claims claims = Jwts.parserBuilder()
-                        .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8))
-                        )
+                        .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
                         .build()
                         .parseClaimsJws(token)
                         .getBody();
@@ -66,30 +61,28 @@ public class AuthenticationFilter implements GatewayFilterFactory<Object> {
                 String userId = claims.getSubject();
                 String role = claims.get("role", String.class);
 
-                // Check role permission based on path
-                Optional<String> matchingKey = roleAccessMap.keySet().stream()
+                Optional<String> match = roleAccessMap.keySet().stream()
                         .filter(path::startsWith)
                         .findFirst();
 
-                if (matchingKey.isPresent()) {
-                    List<String> allowedRoles = roleAccessMap.get(matchingKey.get());
-                    if (!allowedRoles.contains(role)) {
+                if (match.isPresent()) {
+                    List<String> allowed = roleAccessMap.get(match.get());
+                    if (!allowed.contains(role)) {
                         return onError(exchange, "Forbidden: Role '" + role + "' not allowed", HttpStatus.FORBIDDEN);
                     }
                 }
 
-                ServerHttpRequest modifiedRequest = exchange.getRequest()
-                        .mutate()
+                ServerHttpRequest modifiedRequest = request.mutate()
                         .header("X-User-Id", userId)
                         .header("X-User-Role", role)
                         .build();
 
                 return chain.filter(exchange.mutate().request(modifiedRequest).build());
+
             } catch (Exception e) {
                 return onError(exchange, "Invalid Token: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
             }
-
-        });
+        };
     }
 
     private Mono<Void> onError(ServerWebExchange exchange, String msg, HttpStatus status) {
@@ -99,4 +92,11 @@ public class AuthenticationFilter implements GatewayFilterFactory<Object> {
         DataBuffer buffer = response.bufferFactory().wrap(bytes);
         return response.writeWith(Mono.just(buffer));
     }
+
+    private static final Map<String, List<String>> roleAccessMap = Map.of(
+            "/restaurant", List.of("OWNER", "CUSTOMER"),
+            "/order", List.of("CUSTOMER", "OWNER"),
+            "/admin", List.of("ADMIN")
+    );
 }
+
