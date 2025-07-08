@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -20,6 +21,18 @@ import java.util.stream.Collectors;
 @RequestMapping("/restaurant")
 public class RestaurantController {
     private final RestaurantServices restaurantServices;
+
+    @GetMapping
+    public ResponseEntity<List<RestaurantDTO>> getAllRestaurants() {
+        List<Restaurant> restaurants = restaurantServices.getRestaurants();
+
+        return new ResponseEntity<>(
+                restaurants.stream().map(
+                        EntityToDTO::restaurantEntityToDto
+                ).collect(Collectors.toList()),
+                HttpStatus.OK
+        );
+    }
 
     @PostMapping
     public ResponseEntity<RestaurantDTO> createRestaurant(

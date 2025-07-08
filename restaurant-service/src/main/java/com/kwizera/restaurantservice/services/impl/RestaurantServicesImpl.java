@@ -6,6 +6,7 @@ import com.kwizera.restaurantservice.services.RestaurantServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -20,5 +21,10 @@ public class RestaurantServicesImpl implements RestaurantServices {
         if (restaurantOptional.isPresent()) throw new RuntimeException("Restaurant with such name already exists");
 
         return restaurantRepository.save(restaurant);
+    }
+
+    @Override
+    public List<Restaurant> getRestaurants() {
+        return restaurantRepository.findAll();
     }
 }
