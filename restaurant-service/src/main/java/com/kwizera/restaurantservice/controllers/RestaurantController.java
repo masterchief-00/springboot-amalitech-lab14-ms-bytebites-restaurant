@@ -44,6 +44,7 @@ public class RestaurantController {
         }
 
         Restaurant restaurant = Restaurant.builder()
+                .ownerId(restaurantDetails.ownerId())
                 .name(restaurantDetails.name())
                 .description(restaurantDetails.description())
                 .location(restaurantDetails.location())
