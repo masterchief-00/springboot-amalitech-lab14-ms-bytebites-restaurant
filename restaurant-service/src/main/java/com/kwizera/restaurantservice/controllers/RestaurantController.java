@@ -1,0 +1,49 @@
+package com.kwizera.restaurantservice.controllers;
+
+import com.kwizera.restaurantservice.domain.dtos.CreateRestaurantDTO;
+import com.kwizera.restaurantservice.domain.dtos.RestaurantDTO;
+import com.kwizera.restaurantservice.domain.entities.Restaurant;
+import com.kwizera.restaurantservice.domain.mappers.DTOtoEntity;
+import com.kwizera.restaurantservice.domain.mappers.EntityToDTO;
+import com.kwizera.restaurantservice.exceptions.UnauthorizedAccessException;
+import com.kwizera.restaurantservice.services.RestaurantServices;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.stream.Collectors;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/restaurant")
+public class RestaurantController {
+    private final RestaurantServices restaurantServices;
+
+    @PostMapping
+    public ResponseEntity<RestaurantDTO> createRestaurant(
+            @RequestBody CreateRestaurantDTO restaurantDetails,
+            @RequestHeader("X-User-Role") String role
+    ) throws UnauthorizedAccessException {
+        if (!"OWNER".equals(role)) {
+            throw new UnauthorizedAccessException("Only owners can create restaurants.");
+        }
+
+        Restaurant restaurant = Restaurant.builder()
+                .name(restaurantDetails.name())
+                .description(restaurantDetails.description())
+                .location(restaurantDetails.location())
+                .menu(
+                        restaurantDetails.menu().stream().map(
+                                DTOtoEntity::foodDTOtoEntity
+                        ).collect(Collectors.toSet())
+                )
+                .build();
+
+        Restaurant createdRestaurant = restaurantServices.create(restaurant);
+
+        return new ResponseEntity<>(EntityToDTO.restaurantEntityToDto(createdRestaurant), HttpStatus.CREATED);
+
+    }
+}

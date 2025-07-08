@@ -2,9 +2,7 @@ package com.kwizera.restaurantservice.domain.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -12,6 +10,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "foods")
+@Getter
+@Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Builder

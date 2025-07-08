@@ -1,9 +1,7 @@
 package com.kwizera.restaurantservice.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -11,6 +9,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "restaurants")
+@Getter
+@Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Builder
@@ -18,6 +18,9 @@ public class Restaurant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "owner_id", nullable = false)
+    private Long ownerId;
 
     @Column(nullable = false)
     private String name;
