@@ -12,7 +12,7 @@ spring:
         - id: restaurant-service
           uri: lb://RESTAURANT-SERVICE
           predicates:
-            - Path:/restaurant/**
+            - Path=/restaurant/**
     discovery:
       locator:
         enabled: false
