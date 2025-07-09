@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    networks:
+      - spring-net
+  config-server:
+    build: ./config-server
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config-repo:/config-repo
+    environment:
+      - SPRING_PROFILES_ACTIVE=native
+      - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:/config-repo
+    networks:
+      - spring-net
+
+  eureka-server:
+    build: ./eurka-server
+    depends_on:
+      - config-server
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    networks:
+      - spring-net
+
+  api-gateway:
+    build: ./api-gateway
+    depends_on:
+      - config-server
+      - eureka-server
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    networks:
+      - spring-net
+
+  auth-service:
+    build: ./auth-service
+    depends_on:
+      - config-server
+      - eureka-server
+      - postgres
+    ports:
+      - "9000:9000"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    networks:
+      - spring-net
+
+  restaurant-service:
+    build: ./restaurant-service
+    depends_on:
+      - config-server
+      - eureka-server
+    ports:
+      - "9001:9001"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    networks:
+      - spring-net
+
+  order-service:
+    build: ./order-service
+    depends_on:
+      - config-server
+      - eureka-server
+    ports:
+      - "9002:9002"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    networks:
+      - spring-net
+
+volumes:
+  postgres_data:
+
+networks:
+  spring-net:
+    driver: bridge

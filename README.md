@@ -23,19 +23,23 @@ This is a microservices-based restaurant management system designed using Spring
 
 ### 4. 🔐 Auth Service (`auth-service`) _(in progress)_
 - Handles user registration, login, and role-based JWT generation
-- Uses PostgreSQL (or H2 during dev)
+- Uses PostgreSQL
 - Registered with Eureka
 - Routes configured through API Gateway
-
-## 🛠️ Services To Be Implemented
 
 ### 5. 🍴 Restaurant Service
 - CRUD operations for restaurants and their menus
 - Used by owners/admins
+- Registered with Eureka
+- Routes configured through API Gateway
 
 ### 6. 🛒 Order Service
 - Handles placing and managing customer orders
 - Manages order status and history
+- Registered with Eureka
+- Routes configured through API Gateway
+
+## 🛠️ Services To Be Implemented
 
 ### 7. 👤 Notifications service
 - Handles sending push notification to the customers after order placements
@@ -58,6 +62,7 @@ Make sure to:
 5. Test routes via `http://localhost:8080/<path>` (e.g., `/auth/register`)
 
 ## 🗂️ Repository Structure (Monorepo)
+```
 root/
 ├── config-repo/ # YAML config files per service
 ├── config-server/
@@ -65,6 +70,8 @@ root/
 ├── api-gateway/
 ├── auth-service/
 └── ...
+```
+
 
 ## 📝 Notes
 - Config changes in `config-repo` require a restart of `config-server` and dependent services
