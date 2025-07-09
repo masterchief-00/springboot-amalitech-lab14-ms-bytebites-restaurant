@@ -28,10 +28,10 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    private String createToken(Map<String, Object> claims, String subject) {
+    private String createToken(Map<String, Object> claims, Long subject) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(subject)
+                .setSubject(String.valueOf(subject))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInSeconds * 1000L))
                 .signWith(getSigningKey())
@@ -46,7 +46,7 @@ public class JwtUtil {
         claims.put("email", user.getEmail());
         claims.put("role", user.getRole().name());
 
-        return createToken(claims, user.getEmail());
+        return createToken(claims, user.getId());
     }
 
     public Boolean validateToken(String token, String email) {

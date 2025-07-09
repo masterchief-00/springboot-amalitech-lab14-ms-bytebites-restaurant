@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Service
 public class UserServicesImpl implements UserServices {
@@ -47,5 +49,10 @@ public class UserServicesImpl implements UserServices {
         }
 
         return jwtUtil.generateToken(user);
+    }
+
+    @Override
+    public Optional<User> findUser(Long id) {
+        return userRepository.findById(id);
     }
 }
