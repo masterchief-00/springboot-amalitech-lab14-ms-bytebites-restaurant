@@ -15,12 +15,13 @@ public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "food_id", nullable = false)
     private Long foodId;
-    @Column(name = "food_name", nullable = false)
-    private String foodName;
+
     @Column(nullable = false)
     private int quantity;
+
     @ManyToOne
     @JoinColumn(name = "order_id")
     @JsonIgnore

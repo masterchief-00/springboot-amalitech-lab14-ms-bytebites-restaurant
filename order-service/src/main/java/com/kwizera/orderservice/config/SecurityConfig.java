@@ -1,4 +1,4 @@
-package com.kwizera.restaurantservice.config;
+package com.kwizera.orderservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +16,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/restaurant/**","/foods/**").permitAll()
+                        .requestMatchers("/order").permitAll()
                         .anyRequest().authenticated()
                 )
                 .build();

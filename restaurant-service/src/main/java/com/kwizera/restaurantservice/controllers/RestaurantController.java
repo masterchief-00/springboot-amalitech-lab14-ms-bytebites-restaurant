@@ -11,9 +11,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -32,6 +34,20 @@ public class RestaurantController {
                 ).collect(Collectors.toList()),
                 HttpStatus.OK
         );
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<RestaurantDTO> getRestaurant(@PathVariable Long id
+    ) {
+        Optional<Restaurant> restaurant = restaurantServices.findRestaurant(id);
+        return restaurant.map(value -> new ResponseEntity<>(
+                EntityToDTO.restaurantEntityToDto(value),
+                HttpStatus.OK
+        )).orElseGet(() -> new ResponseEntity<>(
+                null,
+                HttpStatus.NOT_FOUND
+        ));
+
     }
 
     @PostMapping

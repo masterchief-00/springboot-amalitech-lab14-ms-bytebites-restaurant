@@ -1,0 +1,76 @@
+package com.kwizera.orderservice.service.impl;
+
+import com.kwizera.orderservice.domain.dtos.*;
+import com.kwizera.orderservice.domain.entities.Order;
+import com.kwizera.orderservice.domain.entities.OrderItem;
+import com.kwizera.orderservice.repositories.OrderRepository;
+import com.kwizera.orderservice.service.OrderServices;
+import com.kwizera.orderservice.service.RemoteServiceClient;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@RequiredArgsConstructor
+@Service
+public class OrderServicesImpl implements OrderServices {
+    private final OrderRepository orderRepository;
+    private final RemoteServiceClient remoteServiceClient;
+
+    @Override
+    @Transactional
+    public OrderDTO createOrder(CreateOrderDTO orderDetails, Long clientId, String token) {
+        Order order = Order.builder()
+                .clientId(clientId)
+                .restaurantId(orderDetails.restaurantId())
+                .build();
+
+        List<OrderItem> items = orderDetails.items().stream().map(
+                item -> {
+                    return OrderItem.builder()
+                            .foodId(item.foodId())
+                            .quantity(item.quantity())
+                            .build();
+                }
+        ).toList();
+
+        order.setItems(items);
+
+        for (OrderItem item : items) {
+            item.setOrder(order);
+        }
+
+        Order createdOrder = orderRepository.save(order);
+
+        // fetch more details for the order created
+        UserDTO client = remoteServiceClient.fetchClient(clientId, token);
+        RestaurantDTO restaurant = remoteServiceClient.fetchRestaurant(orderDetails.restaurantId(), token);
+
+        List<OrderItemDTO> enrichedItems = items.stream().map(
+                orderItem -> {
+                    FoodDTO food = remoteServiceClient.fetchFood(orderItem.getFoodId(), token);
+
+                    return OrderItemDTO.builder()
+                            .name(food.name())
+                            .quantity(orderItem.getQuantity())
+                            .subTotal(food.price() * orderItem.getQuantity())
+                            .build();
+                }
+        ).toList();
+
+        Double price = enrichedItems.stream().mapToDouble(OrderItemDTO::subTotal).sum();
+
+        return OrderDTO.builder()
+                .customer(client.names())
+                .restaurant(restaurant.name())
+                .totalPrice(price)
+                .items(enrichedItems)
+                .build();
+    }
+
+    @Override
+    public List<Order> getOrders(Long id) {
+        return null;
+    }
+}

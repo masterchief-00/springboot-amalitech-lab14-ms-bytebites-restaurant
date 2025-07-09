@@ -96,7 +96,9 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     private static final Map<String, List<String>> roleAccessMap = Map.of(
             "/restaurant", List.of("OWNER", "CUSTOMER"),
             "/order", List.of("CUSTOMER", "OWNER"),
-            "/admin", List.of("ADMIN")
+            "/admin", List.of("ADMIN"),
+            "/users", List.of("CUSTOMER", "ADMIN"),
+            "/foods", List.of("CUSTOMER", "OWNER")
     );
 }
 
