@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -70,7 +71,36 @@ public class OrderServicesImpl implements OrderServices {
     }
 
     @Override
-    public List<Order> getOrders(Long id) {
-        return null;
+    public List<OrderDTO> getUserOrders(Long userId, String token) {
+        List<Order> fetchedOrders = orderRepository.findAllByClientId(userId);
+
+        // fetch more details for the orders
+        UserDTO client = remoteServiceClient.fetchClient(userId, token);
+        return fetchedOrders.stream().map(
+                order -> {
+                    RestaurantDTO restaurant = remoteServiceClient.fetchRestaurant(order.getRestaurantId(), token);
+
+                    List<OrderItemDTO> orderItemDTOS = order.getItems().stream().map(
+                            orderItem -> {
+                                FoodDTO food = remoteServiceClient.fetchFood(orderItem.getFoodId(), token);
+
+                                return OrderItemDTO.builder()
+                                        .name(food.name())
+                                        .quantity(orderItem.getQuantity())
+                                        .subTotal(food.price() * orderItem.getQuantity())
+                                        .build();
+                            }
+                    ).toList();
+
+                    Double price = orderItemDTOS.stream().mapToDouble(OrderItemDTO::subTotal).sum();
+
+                    return OrderDTO.builder()
+                            .customer(client.names())
+                            .restaurant(restaurant.name())
+                            .totalPrice(price)
+                            .items(orderItemDTOS)
+                            .build();
+                }
+        ).toList();
     }
 }
