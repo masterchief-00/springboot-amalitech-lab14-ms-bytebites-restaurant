@@ -3,14 +3,17 @@ package com.kwizera.orderservice.service.impl;
 import com.kwizera.orderservice.domain.dtos.*;
 import com.kwizera.orderservice.domain.entities.Order;
 import com.kwizera.orderservice.domain.entities.OrderItem;
+import com.kwizera.orderservice.domain.enums.OrderStatus;
 import com.kwizera.orderservice.repositories.OrderRepository;
 import com.kwizera.orderservice.service.OrderServices;
 import com.kwizera.orderservice.service.RemoteServiceClient;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -104,5 +107,18 @@ public class OrderServicesImpl implements OrderServices {
                             .build();
                 }
         ).toList();
+    }
+
+    @Override
+    public Order updateOrderStatus(Long orderId, OrderStatus orderStatus) {
+        Optional<Order> foundOrder = orderRepository.findById(orderId);
+
+        if (foundOrder.isPresent()) {
+            Order order = foundOrder.get();
+            order.setStatus(orderStatus);
+            orderRepository.save(order);
+        }
+
+        return null;
     }
 }

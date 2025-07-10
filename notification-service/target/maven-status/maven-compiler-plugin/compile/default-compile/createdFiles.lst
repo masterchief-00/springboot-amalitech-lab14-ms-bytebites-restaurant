@@ -1,0 +1,7 @@
+com\kwizera\notificationservice\domain\events\OrderPlacedEvent$OrderPlacedEventBuilder.class
+com\kwizera\notificationservice\utils\CustomLogger$LogLevel.class
+com\kwizera\notificationservice\Listeners\OrderEventListeners.class
+com\kwizera\notificationservice\config\RabbitMQConfig.class
+com\kwizera\notificationservice\domain\events\OrderPlacedEvent.class
+com\kwizera\notificationservice\NotificationServiceApplication.class
+com\kwizera\notificationservice\utils\CustomLogger.class
