@@ -63,6 +63,7 @@ public class OrderServicesImpl implements OrderServices {
         Double price = enrichedItems.stream().mapToDouble(OrderItemDTO::subTotal).sum();
 
         return OrderDTO.builder()
+                .id(order.getId())
                 .customer(client.names())
                 .restaurant(restaurant.name())
                 .totalPrice(price)
@@ -95,6 +96,7 @@ public class OrderServicesImpl implements OrderServices {
                     Double price = orderItemDTOS.stream().mapToDouble(OrderItemDTO::subTotal).sum();
 
                     return OrderDTO.builder()
+                            .id(order.getId())
                             .customer(client.names())
                             .restaurant(restaurant.name())
                             .totalPrice(price)
