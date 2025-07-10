@@ -22,7 +22,7 @@ This is a microservices-based restaurant management system designed using Spring
 - Integrates with Eureka and forwards requests using `lb://<service-name>`
 - Running on: `http://localhost:8080`
 
-### 4. 🔐 Auth Service (`auth-service`) _(in progress)_
+### 4. 🔐 Auth Service (`auth-service`)
 - Handles user registration, login, and role-based JWT generation
 - Uses PostgreSQL (or H2 during dev)
 - Registered with Eureka
