@@ -26,6 +26,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue orderUpdatedQueue() {
+        return new Queue("order.updated.queue", true);
+    }
+
+    @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
@@ -38,7 +43,15 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding binding() {
+    public Binding orderUpdatedBinding() {
+        return BindingBuilder
+                .bind(orderUpdatedQueue())
+                .to(orderExchange())
+                .with("order.updated");
+    }
+
+    @Bean
+    public Binding orderPlacedBinding() {
         return BindingBuilder
                 .bind(orderPlacedQueue())
                 .to(orderExchange())

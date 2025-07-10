@@ -1,8 +1,12 @@
 package com.kwizera.orderservice.domain.dtos;
 
-import com.kwizera.orderservice.domain.enums.OrderStatus;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 
 public record UpdateOrderStatusDTO(
-        OrderStatus newStatus
+        @Min(1)
+        @Max(4)
+        int newStatus
 ) {
 }

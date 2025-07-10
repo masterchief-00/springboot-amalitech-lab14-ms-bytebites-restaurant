@@ -8,13 +8,11 @@ import com.kwizera.orderservice.repositories.OrderRepository;
 import com.kwizera.orderservice.service.OrderServices;
 import com.kwizera.orderservice.service.RemoteServiceClient;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -110,13 +108,25 @@ public class OrderServicesImpl implements OrderServices {
     }
 
     @Override
-    public Order updateOrderStatus(Long orderId, OrderStatus orderStatus) {
+    public Order updateOrderStatus(Long orderId, UpdateOrderStatusDTO newOrderStatus) {
         Optional<Order> foundOrder = orderRepository.findById(orderId);
+        OrderStatus status = null;
+
+        switch (newOrderStatus.newStatus()) {
+            case 1 -> status = OrderStatus.PENDING;
+            case 2 -> status = OrderStatus.CONFIRMED;
+            case 3 -> status = OrderStatus.DELIVERED;
+            case 4 -> status = OrderStatus.CANCELLED;
+            default -> {
+                return null;
+            }
+        }
 
         if (foundOrder.isPresent()) {
             Order order = foundOrder.get();
-            order.setStatus(orderStatus);
+            order.setStatus(status);
             orderRepository.save(order);
+            return order;
         }
 
         return null;
