@@ -3,6 +3,7 @@ package com.kwizera.orderservice.service.impl;
 import com.kwizera.orderservice.domain.dtos.*;
 import com.kwizera.orderservice.domain.entities.Order;
 import com.kwizera.orderservice.domain.entities.OrderItem;
+import com.kwizera.orderservice.domain.enums.OrderStatus;
 import com.kwizera.orderservice.repositories.OrderRepository;
 import com.kwizera.orderservice.service.OrderServices;
 import com.kwizera.orderservice.service.RemoteServiceClient;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -104,5 +105,30 @@ public class OrderServicesImpl implements OrderServices {
                             .build();
                 }
         ).toList();
+    }
+
+    @Override
+    public Order updateOrderStatus(Long orderId, UpdateOrderStatusDTO newOrderStatus) {
+        Optional<Order> foundOrder = orderRepository.findById(orderId);
+        OrderStatus status = null;
+
+        switch (newOrderStatus.newStatus()) {
+            case 1 -> status = OrderStatus.PENDING;
+            case 2 -> status = OrderStatus.CONFIRMED;
+            case 3 -> status = OrderStatus.DELIVERED;
+            case 4 -> status = OrderStatus.CANCELLED;
+            default -> {
+                return null;
+            }
+        }
+
+        if (foundOrder.isPresent()) {
+            Order order = foundOrder.get();
+            order.setStatus(status);
+            orderRepository.save(order);
+            return order;
+        }
+
+        return null;
     }
 }

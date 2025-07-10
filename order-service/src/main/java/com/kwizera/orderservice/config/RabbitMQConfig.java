@@ -15,6 +15,7 @@ public class RabbitMQConfig {
         return new TopicExchange("order.exchange");
     }
 
+
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();

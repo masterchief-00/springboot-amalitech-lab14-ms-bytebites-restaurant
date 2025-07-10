@@ -1,0 +1,5 @@
+C:\Users\pacst\Documents\coding\springboot-amalitech-lab14-ms-bytebites-restaurant\notification-service\src\main\java\com\kwizera\notificationservice\config\RabbitMQConfig.java
+C:\Users\pacst\Documents\coding\springboot-amalitech-lab14-ms-bytebites-restaurant\notification-service\src\main\java\com\kwizera\notificationservice\domain\events\OrderPlacedEvent.java
+C:\Users\pacst\Documents\coding\springboot-amalitech-lab14-ms-bytebites-restaurant\notification-service\src\main\java\com\kwizera\notificationservice\Listeners\OrderEventListeners.java
+C:\Users\pacst\Documents\coding\springboot-amalitech-lab14-ms-bytebites-restaurant\notification-service\src\main\java\com\kwizera\notificationservice\NotificationServiceApplication.java
+C:\Users\pacst\Documents\coding\springboot-amalitech-lab14-ms-bytebites-restaurant\notification-service\src\main\java\com\kwizera\notificationservice\utils\CustomLogger.java
